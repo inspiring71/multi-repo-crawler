@@ -1,9 +1,17 @@
+
 # Multi Repository Github Parallel Crawler
 The main objective of this script is to crawl multiple Github repositories using [etcr crawler](https://github.com/inspiring71/etcr-infrastructure) in a parallel fashion and save the output in a postgresql database.
 
+
+# Current compatibility Status:
+- ✅  Mac Silicon
+- ❓ Mac Intel 
+- ❓ Ubuntu
+- ❓ Windows
+> **_Contribution Requested:_**  This script has only been tested on Mac silicon. If you are on Ubuntu, Apple intel, or Windows machine please try this tool and let me know if it works. Any PRs about compatibility is welcome.
+
 # requirements
-1. Docker on your machine and you should be good!
-2.
+Docker on your machine and you should be good!
 
 # How to run
 1. Clone this repository into your machine.
