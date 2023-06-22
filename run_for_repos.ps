@@ -1,0 +1,56 @@
+# Function to check if the pattern is found in the logs
+function Check-Logs {
+    docker logs $crawler_name | Select-String -Quiet $pattern > $null
+    if ($?) {
+        Write-Host "Pattern found in the logs"
+        return 0
+    }
+    else {
+        Write-Host "Pattern not found in the logs"
+        return 1
+    }
+}
+
+$sleepTime = 10
+# Load variables from .env file
+$env = Get-Content .env | ForEach-Object { ConvertFrom-StringData $_ }
+$repo_list = Get-Content repo_list.env | ForEach-Object { ConvertFrom-StringData $_ }
+
+#list of repos to crawl
+$repos = $repo_list.repositories -split ","
+$tokens = $env.token_list -split ","
+$token_num = $tokens.Count
+
+# Create db folder if not exist
+if (-not (Test-Path $env.db_folder)) {
+    Write-Host "Creating $($env.db_folder) folder"
+    New-Item -ItemType Directory -Path $env.db_folder | Out-Null
+}
+
+# Spin up the database containers
+docker-compose -f db.docker-compose.yml up -d
+
+# sleep to make sure the database is up
+Start-Sleep -Seconds 2
+
+foreach ($repo in $repos) {
+    $crawler_name = $repo -replace "/", "-"
+    $random_index = Get-Random -Minimum 0 -Maximum $token_num
+    # Select the element at the random index
+    $random_token = $tokens[$random_index]
+
+    Write-Host "Starting the crawler for $crawler_name with token $random_token"
+    $env:repositories = $repo
+    $env:crawler_name = $crawler_name
+    $env:token = $random_token
+    $env:no_build = "yes"
+    docker-compose --project-name=$crawler_name up -d
+
+    $pattern = "createdb $repo."
+    Write-Host "Wait for the docker to reach maturity level from the logs"
+    Write-Host "We check pattern '$pattern' in the container logs..."
+    while (-not (Check-Logs)) {
+        Write-Host "Sleeping for $sleepTime seconds"
+        Start-Sleep -Seconds $sleepTime
+    }
+}
