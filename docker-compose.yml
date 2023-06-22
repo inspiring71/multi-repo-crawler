@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  crawler:
+    container_name: ${crawler_name}
+    image: ubuntu/postgres
+    # restart: always
+    environment:
+      token: ${token}
+      db_host: ${db_host}
+      db_port: ${db_port}
+      db_user: ${db_user}
+      db_pass: ${db_pass}
+      repositories: ${repositories}
+      TZ: America/Montreal
+      PGTZ: America/Montreal
+    # command: bash -c "pwd && apt update && apt install -y git && mkdir code && cd code && git clone https://github.com/inspiring71/etcr-infrastructure.git && apt install openjdk-11-jdk -y && echo 'Crawler is cloned!' && cd etcr-infrastructure && mkdir logs && chmod +x gradlew && ./gradlew build && ./createdbs.sh && ./crawl.sh"
+    command: bash -c "chmod +x /scripts/init.sh && /scripts/init.sh"
+    volumes:
+      - ${data_dump_folder}:/data_dump
+      - ./scripts:/scripts
+    networks:
+      - specific-network-name
+networks:
+  specific-network-name:
+    external: true

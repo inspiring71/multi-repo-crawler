@@ -1,0 +1,8 @@
+data_dump/
+db/
+db_new/
+db_new_prev/
+etcr-infrastructure/
+.env
+repo_list.env
+.DS_Store
